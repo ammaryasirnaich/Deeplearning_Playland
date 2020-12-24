@@ -1,0 +1,14 @@
+numpy==1.19.4 
+pandas==1.1.5 
+scikit-learn 
+matplotlib==3.3.3 
+seaborn==0.11.1 
+pyyaml==5.3.1 
+h5py==3.1.0  
+keras==2.4.3 
+mxnet 
+chainer 
+theano==1.0.5 
+nltk==3.5
+jupyter 
+tensorflow
