@@ -52,7 +52,7 @@
 ```
 @misc{naich2020AIplayland,
     author = {Ammar Yasir Naich},
-    title = {AIPlayland: Creating an deep learning environment with out any hassle.},
+    title = {AIPlayland: Creating a deep learning environment with out any hassle.},
     year = {2020},
     publisher = {GitHub},
     journal = {GitHub repository},
