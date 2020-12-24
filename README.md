@@ -43,7 +43,7 @@
 [matplotlib]()             | 3.3.3
 [seaborn]()                |  0.11.0
 [h5py]()                   |  2.10.0
-[openCV]Support for both GPU and CPU()                    |  4.5
+[openCV]# Support for both GPU and CPU()                    |  4.5
 
 
 
