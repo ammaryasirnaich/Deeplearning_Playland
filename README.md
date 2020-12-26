@@ -13,37 +13,29 @@
 
 . Deep Learning Packages                              | GPU Verisons         | CPU version|
 :------------------------------------------------: | :------------------: | :------------------:  | 
- [ubuntu](https://www.ubuntu.com)                  | 20.04                |       20.04           |
- [cuda](https://developer.nvidia.com/cuda-zone)    | 11.1.0               |        -              |
- [cudnn](https://developer.nvidia.com/cudnn)       | 8                    |        -              |
- [onnx](https://onnx.ai)                           | X                    |                       |
- [theano](http://deeplearning.net/software/theano) | 1.0.5                |1.0.5                  |                       
- [tensorflow](http://www.tensorflow.org)           | 2.4                  | 2.4                   |                        
- [sonnet](https://github.com/deepmind/sonnet)      | X                    |                        |
- [pytorch](http://pytorch.org)                     | 1.7.1                |        1.7.1           |                        
- [keras](https://keras.io)                         | 2.4.3                |              2.4.3     |                        
- [lasagne](http://lasagne.readthedocs.io)          | X                    |                        |
- [mxnet](http://mxnet.incubator.apache.org)        | X                    |                        |
- [cntk](http://cntk.ai)                            | X                    |                        |
- [chainer](https://chainer.org)                    | X                    |                        |
- [caffe](http://caffe.berkeleyvision.org)          | O                    |                        |
- [caffe2](https://caffe2.ai)                       | X                    |                       |
- [torch](http://torch.ch/)                         | X                    |                       |
- [darknet](https://pjreddie.com/darknet/)          | X                    |                       |
- [paddlepaddle](https://www.paddlepaddle.org.cn/)  | X                    |                       |
+ [ubuntu](https://www.ubuntu.com)                  | 20.04           |       20.04            |
+ [cuda](https://developer.nvidia.com/cuda-zone)    | 11.1.0              |     :x:                |
+ [cudnn](https://developer.nvidia.com/cudnn)       | 8                   |     :x:                |
+ [theano](http://deeplearning.net/software/theano) | 1.0.5               |1.0.5                 |                       
+ [tensorflow](http://www.tensorflow.org)           | 2.4                 | 2.4                  |                        
+ [pytorch](http://pytorch.org)                     | 1.7.1               |        1.7.1           |                        
+ [keras](https://keras.io)                         | 2.4.3               |              2.4.3     |                        
+ [darknet](https://pjreddie.com/darknet/)          | :heavy_check_mark:                  |                       | 
 
 
 ## Support For Python Packages 
 
  Python Packages       |  Version |
 :---------------------: | :------: |
+[OpenCV (GPU and CPU acceleraeted support)]()                 |  4.5
 [numpy]()                  | 1.19.4 
 [pandas]()                | 1.1.5
 [scikit-learn]()           | 0.23.2
 [matplotlib]()             | 3.3.3
 [seaborn]()                |  0.11.0
 [h5py]()                   |  2.10.0
-[OpenCV (GPU and CPU acceleraeted support)]()                 |  4.5
+[jupyterlab]()           |
+[nltk]()                 | 3.5 
 
 
 
