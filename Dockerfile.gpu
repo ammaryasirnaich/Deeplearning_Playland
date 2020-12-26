@@ -1,7 +1,7 @@
 
 ARG CUDA_VERSION=11.1
-
-FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu20.04
+#FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu20.04
+FROM nvidia/cuda:11.1-devel-ubuntu18.04
 
 MAINTAINER "Ammar Yasir Niach   email:ammar.naich@gmail.com"
 
