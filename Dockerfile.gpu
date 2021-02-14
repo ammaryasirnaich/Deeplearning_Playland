@@ -1,7 +1,11 @@
 
-ARG CUDA_VERSION=11.1
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-ubuntu20.04
+ARG CUDA_VERSION=11.2.0
 
+#FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-ubuntu20.04
+# Nvida docker with openGL
+#https://ngc.nvidia.com/catalog/containers/nvidia:cudagl
+
+FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu20.04    
 
 MAINTAINER "Ammar Yasir Niach   email:ammar.naich@gmail.com"
 
@@ -9,6 +13,8 @@ MAINTAINER "Ammar Yasir Niach   email:ammar.naich@gmail.com"
 ENV DEBIAN_FRONTEND noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV CUDNN_VERSION 8.1.0.77
+ENV NCCL_VERSION 2.8.4
 
 ARG PYTHON_VERSION=3.8
 ARG OPENCV_VERSION=4.5.0
@@ -24,21 +30,40 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY gpu_requirements.txt ./
 
 # Add CUDA libs paths
-RUN CUDA_PATH=(/usr/local/cuda-*) && \
-    CUDA=`basename $CUDA_PATH` && \
-    echo "$CUDA_PATH/compat" >> /etc/ld.so.conf.d/${CUDA/./-}.conf && \
-    ldconfig && \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libtinfo5 libncursesw5 \
+    cuda-cudart-dev-11-2=11.2.72-1 \
+    cuda-command-line-tools-11-2=11.2.0-1 \
+    cuda-minimal-build-11-2=11.2.0-1 \
+    cuda-libraries-dev-11-2=11.2.0-1 \
+    cuda-nvml-dev-11-2=11.2.67-1 \
+    libnpp-dev-11-2=11.2.1.68-1 \
+    libnccl-dev=2.8.4-1+cuda11.2 \
+    libcublas-dev-11-2=11.3.1.68-1 \
+    libcusparse-dev-11-2=11.3.1.68-1 \
+    ## add CUDNN
+    libcudnn8=$CUDNN_VERSION-1+cuda11.2 \
+    libcudnn8-dev=$CUDNN_VERSION-1+cuda11.2 \
+    && apt-mark hold libcudnn8 
+
+# apt from auto upgrading the cublas package. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
+RUN apt-mark hold libcublas-dev-11-2 libnccl-dev
+ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
+
 # add sources for older pythons
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y --no-install-recommends software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
 
+
 # Install all dependencies for OpenCV
     apt-get -y update -qq --fix-missing && \
-    apt-get -y install --no-install-recommends \
+    apt-get -y install --no-install-recommends &&\
+    apt-get -y install openexr \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
         $( [ ${PYTHON_VERSION%%.*} -ge 3 ] && echo "python${PYTHON_VERSION%%.*}-distutils" ) \
+        git\
         gnupg2\
         ca-certificates \
         wget \
@@ -82,7 +107,9 @@ RUN CUDA_PATH=(/usr/local/cuda-*) && \
         zlib1g-dev \
         libsm6 \
         libxext6 \
-        libxrender1 
+        libxrender1 \
+        libopencv-dev
+        
 
 
 # install python dependencies
@@ -90,20 +117,7 @@ RUN CUDA_PATH=(/usr/local/cuda-*) && \
 RUN wget https://bootstrap.pypa.io/get-pip.py --progress=bar:force:noscroll && \
     python${PYTHON_VERSION} get-pip.py && \
     rm get-pip.py && \
-    pip${PYTHON_VERSION} install \
-    numpy==1.19.4 \
-    pandas==1.1.5 \
-    scikit-learn==0.23.2 \
-    matplotlib==3.3.3 \
-    seaborn==0.11.1 \
-    pyyaml==5.3.1 \
-    #h5py==3.1.0\
-    tensorflow==2.4.0 \
-    keras==2.4.3 \ 
-    chainer \
-    theano==1.0.5 \
-    jupyterlab \
-    nltk==3.5
+    pip${PYTHON_VERSION} install -r gpu_requirements.txt
 
 # Opening port for jupyter
 EXPOSE 8888
@@ -186,55 +200,23 @@ RUN wget https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip -O opencv.
     ldconfig 
 
 ################# darknet 
- WORKDIR /app
+
+# RUN apt update 
+# RUN apt install -y \
+#     pkg-config git build-essential libopencv-dev
+
+# build darknet
+WORKDIR /app
 RUN git clone https://github.com/AlexeyAB/darknet.git
 WORKDIR darknet
 RUN make OPENCV=1 GPU=1 AVX=1 OPENMP=1 CUDNN=1 CUDNN_HALF=1 OPENMP=1 -j $(nproc)
 RUN chmod +x darknet
 
 
-# cleaning
-# RUN   apt-get -y remove \
-#         unzip \
-#         cmake \
-#         gfortran \
-#         apt-utils \
-#         pkg-config \
-#         checkinstall \
-#         build-essential \
-#         libopenblas-dev \
-#         liblapack-dev \
-#         libatlas-base-dev \
-#         #libgtk-3-dev \
-#         libavcodec-dev \
-#         libavformat-dev \
-#         libavutil-dev \
-#         libswscale-dev \
-#         libjpeg8-dev \
-#         libpng12-dev \
-#         libtiff5-dev \
-#         libdc1394-22-dev \
-#         libxine2-dev \
-#         libv4l-dev \
-#         libgstreamer1.0-dev \
-#         libgstreamer-plugins-base1.0-dev \
-#         libglew-dev \
-#         libpostproc-dev \
-#         libeigen3-dev \
-#         libtbb-dev \
-#         zlib1g-dev \
-#     && \
-
-#    
-#     apt-get autoremove -y && \
-#        apt-get clean && \
-#        rm -rf /var/lib/apt/lists/* /tmp/* ~/* 
-       #&& \
-#     rm -rf /opencv /opencv_contrib /var/lib/apt/lists/* && \
 
 
 # Set the default python and install PIP packages
- RUN update-alternatives --install /usr/bin/python${PYTHON_VERSION%%.*} python${PYTHON_VERSION%%.*} /usr/bin/python${PYTHON_VERSION} 1 && \
+RUN  update-alternatives --install /usr/bin/python${PYTHON_VERSION%%.*} python${PYTHON_VERSION%%.*} /usr/bin/python${PYTHON_VERSION} 1 && \
      update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1 && \
 
 # Call default command.
@@ -242,6 +224,51 @@ RUN chmod +x darknet
     #ldd `which ffmpeg` && \
     python --version && \
     python -c "import cv2 ; print(cv2.__version__)"
+
+
+#cleaning
+RUN   apt-get -y remove \
+        unzip \
+        cmake \
+        gfortran \
+        apt-utils \
+        pkg-config \
+        checkinstall \
+        build-essential \
+        libopenblas-dev \
+        liblapack-dev \
+        libatlas-base-dev \
+        #libgtk-3-dev \
+        libavcodec-dev \
+        libavformat-dev \
+        libavutil-dev \
+        libswscale-dev \
+        libjpeg8-dev \
+        libpng12-dev \
+        libtiff5-dev \
+        libdc1394-22-dev \
+        libxine2-dev \
+        libv4l-dev \
+        libgstreamer1.0-dev \
+        libgstreamer-plugins-base1.0-dev \
+        libglew-dev \
+        libpostproc-dev \
+        libeigen3-dev \
+        libtbb-dev \
+        zlib1g-dev \
+    && \ 
+    apt-get autoremove -y && \
+       apt-get clean && \
+       rm -rf /var/lib/apt/lists/* /tmp/* ~/* \
+       && \
+    rm -rf /opencv /opencv_contrib /var/lib/apt/lists/*
+    
+
+
+RUN    apt-get autoremove -y && \
+       apt-get clean && \
+       rm -rf /var/lib/apt/lists/* /tmp/* ~/* 
+
 
 
 WORKDIR "/root/"
