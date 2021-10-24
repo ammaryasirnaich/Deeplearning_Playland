@@ -1,23 +1,35 @@
+From nvidia/cuda:11.4.2-cudnn8-devel-ubuntu20.04
 
-ARG CUDA_VERSION=11.2.0
+# FROM base as base-amd64
 
-#FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-ubuntu20.04
-# Nvida docker with openGL
-#https://ngc.nvidia.com/catalog/containers/nvidia:cudagl
+ENV NV_CUDNN_VERSION 8.2.4.15
 
-FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu20.04    
+ENV NV_CUDNN_PACKAGE "libcudnn8=$NV_CUDNN_VERSION-1+cuda11.4"
+ENV NV_CUDNN_PACKAGE_DEV "libcudnn8-dev=$NV_CUDNN_VERSION-1+cuda11.4"
+ENV NV_CUDNN_PACKAGE_NAME "libcudnn8"
 
-MAINTAINER "Ammar Yasir Niach   email:ammar.naich@gmail.com"
+# FROM base-${TARGETARCH}
+
+ARG TARGETARCH
+
+LABEL maintainer "Ammar Yasir Naich <ammar.naich@gmail.com>"
 
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV CUDNN_VERSION 8.1.0.77
-ENV NCCL_VERSION 2.8.4
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
-ARG PYTHON_VERSION=3.8
-ARG OPENCV_VERSION=4.5.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ${NV_CUDNN_PACKAGE} \
+    ${NV_CUDNN_PACKAGE_DEV} \
+    && apt-mark hold ${NV_CUDNN_PACKAGE_NAME} && \
+    rm -rf /var/lib/apt/lists/*
+
+
+
 
 # Needed for string substitution
 SHELL ["/bin/bash", "-c"]
@@ -25,30 +37,11 @@ SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 
 
-# ENV LD_LIBRARY_PATH /usr/local/${CUDA}/compat:$LD_LIBRARY_PATH
+ARG PYTHON_VERSION=3.8
+ARG OPENCV_VERSION=4.5.0
 
 COPY gpu_requirements.txt ./
 
-# Add CUDA libs paths
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libtinfo5 libncursesw5 \
-    cuda-cudart-dev-11-2=11.2.72-1 \
-    cuda-command-line-tools-11-2=11.2.0-1 \
-    cuda-minimal-build-11-2=11.2.0-1 \
-    cuda-libraries-dev-11-2=11.2.0-1 \
-    cuda-nvml-dev-11-2=11.2.67-1 \
-    libnpp-dev-11-2=11.2.1.68-1 \
-    libnccl-dev=2.8.4-1+cuda11.2 \
-    libcublas-dev-11-2=11.3.1.68-1 \
-    libcusparse-dev-11-2=11.3.1.68-1 \
-    ## add CUDNN
-    libcudnn8=$CUDNN_VERSION-1+cuda11.2 \
-    libcudnn8-dev=$CUDNN_VERSION-1+cuda11.2 \
-    && apt-mark hold libcudnn8 
-
-# apt from auto upgrading the cublas package. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
-RUN apt-mark hold libcublas-dev-11-2 libnccl-dev
-ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
 
 # add sources for older pythons
 RUN apt-get update && \
@@ -108,7 +101,9 @@ RUN apt-get update && \
         libsm6 \
         libxext6 \
         libxrender1 \
-        libopencv-dev
+        libopencv-dev \
+        libboost-all-dev \
+        python3-dev 
         
 
 
@@ -122,6 +117,9 @@ RUN wget https://bootstrap.pypa.io/get-pip.py --progress=bar:force:noscroll && \
 # Opening port for jupyter
 EXPOSE 8888
 
+# Opening port for Tensorboard
+EXPOSE 6006
+
 
 # Tensorflow Current stable release for CPU and GPU and Keras
 #RUN pip${PYTHON_VERSION} install tensorflow keras mxnet-cu102 optuna cupy-cuda111 chainer theano 
@@ -130,7 +128,7 @@ EXPOSE 8888
 EXPOSE 6006
 
 ## install pytoch  
-RUN pip${PYTHON_VERSION} install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html 
+RUN pip${PYTHON_VERSION} install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
 #Java
@@ -201,10 +199,6 @@ RUN wget https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip -O opencv.
 
 ################# darknet 
 
-# RUN apt update 
-# RUN apt install -y \
-#     pkg-config git build-essential libopencv-dev
-
 # build darknet
 WORKDIR /app
 RUN git clone https://github.com/AlexeyAB/darknet.git
@@ -234,7 +228,6 @@ RUN   apt-get -y remove \
         apt-utils \
         pkg-config \
         checkinstall \
-        build-essential \
         libopenblas-dev \
         liblapack-dev \
         libatlas-base-dev \
@@ -275,6 +268,4 @@ WORKDIR "/root/"
 
 #ENTRYPOINT ["/bin/bash"]
 CMD ["jupyter","notebook","--port=8888","--ip=0.0.0.0","--allow-root","--no-browser"]
-
-
 
