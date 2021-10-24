@@ -2,7 +2,7 @@
 ***Deeplearning_Playland*** is a repository containing  [*Docker*](http://www.docker.com/) images that
 - Allows you to setup your deep learning development environment with any hassle
 - supports almost all [commonly used deep learning frameworks](#Available-tags)
-- Supports Both [Nvidia GPU acceleration](#GPU) (CUDA 11.1.0 and cuDNN 8) and   in [CPU-only mode](#GPU)
+- Supports Both [Nvidia GPU acceleration](#GPU) (CUDA 11.4.2 and cuDNN 8) and   in [CPU-only mode](#GPU)
 - Works on [Linux](#) , [Windows](#)  and [OS X](#)
 -  Supports Python version 3.8
 
