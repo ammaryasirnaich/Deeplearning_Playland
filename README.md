@@ -14,7 +14,7 @@
 . Deep Learning Packages                              | GPU Verisons         | CPU version|
 :------------------------------------------------: | :------------------: | :------------------:  | 
  [ubuntu](https://www.ubuntu.com)                  | 20.04           |       20.04            |
- [cuda](https://developer.nvidia.com/cuda-zone)    | 11.1.0              |     :x:                |
+ [cuda](https://developer.nvidia.com/cuda-zone)    | 11.4.2              |     :x:                |
  [cudnn](https://developer.nvidia.com/cudnn)       | 8                   |     :x:                |
  [theano](http://deeplearning.net/software/theano) | 1.0.5               |1.0.5                 |                       
  [tensorflow](http://www.tensorflow.org)           | 2.4                 | 2.4                  |                        
